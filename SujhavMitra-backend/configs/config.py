@@ -9,7 +9,7 @@ dbconfig = {
     "port":3306,
     "user": "root",
     "password": "",
-    "database": "db_sujhavmitra"
+    "database": "db_sujhavmitranew"
 }
 
 JWT_SECRET = os.getenv("JWT_SECRET")
