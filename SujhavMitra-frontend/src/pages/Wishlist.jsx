@@ -20,7 +20,7 @@ export default function Wishlist() {
   return (
     <div className="wrapper pb-16">
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">My Wishlist</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Wishlist</h1>
 
         <div className="flex gap-2 mb-6">
           {tabs.map((t) => (
