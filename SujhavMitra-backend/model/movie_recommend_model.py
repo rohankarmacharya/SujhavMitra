@@ -9,8 +9,12 @@ class MovieRecommendModel:
         # Load data
         with open("models/movie_list.pkl", "rb") as f:
             self.movies = pickle.load(f)
+        with open("models/movie_homepage_link.pkl", "rb") as f:
+            homepage_df  = pickle.load(f)
         with open("models/similarity_movies.pkl", "rb") as f:
             self.similarity = pickle.load(f)
+
+        self.movie_homepage_link = dict(zip(homepage_df['movie_id'], homepage_df['homepage']))
 
         # Preprocess and cache normalized titles
         self.movies["normalized_title"] = self.movies["title"].str.lower().str.strip()
@@ -37,14 +41,18 @@ class MovieRecommendModel:
         if isinstance(overview, list):
             overview = " ".join(str(word) for word in overview)
 
+        movie_id = int(row["movie_id"])
         movie = {
-            "id": int(row["movie_id"]),
+            "id": movie_id,
             "title": str(row["title"]),
             "overview": overview,
             "genres": genres,
             "cast": cast,
             "crew": str(row["crew"]),
         }
+         # Fetch homepage from DataFrame
+        movie["homepage"] = self.movie_homepage_link.get(movie_id, None)
+
 
         # Optional poster/image fields if present in data
         # Common columns: poster_path, poster_url, image_url, backdrop_path

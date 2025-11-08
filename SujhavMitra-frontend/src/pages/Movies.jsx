@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { useLocation } from "react-router-dom";
 import { fetchPopularMovies, fetchMovieRecommendations } from "../services/api";
 import MovieCard from "../components/MovieCard";
@@ -6,6 +12,7 @@ import MovieSlider from "../components/recommendation/MovieSlider";
 import MovieSkeleton from "../components/MovieSkeleton";
 import SectionHeader from "../components/SectionHeader";
 import "../index.css";
+import { showToast } from "../utils/toast";
 
 export default function Movies() {
   const [popular, setPopular] = useState([]);
@@ -38,17 +45,15 @@ export default function Movies() {
 
   // Toast reminder of current section
   useEffect(() => {
-    try {
-      window.dispatchEvent(
-        new CustomEvent("app:toast", { detail: { message: "You are in Movies", variant: "info", timeout: 2200 } })
-      );
-    } catch {}
+    showToast("You are in Books");
   }, []);
 
   const handleSearch = useCallback(
     async (e, qOverride) => {
       if (e) e.preventDefault();
-      const q = (typeof qOverride === "string" ? qOverride : query || "").trim();
+      const q = (
+        typeof qOverride === "string" ? qOverride : query || ""
+      ).trim();
       if (!q) {
         setError("Please enter a movie title to search.");
         return;
@@ -135,7 +140,9 @@ export default function Movies() {
       }
       try {
         const data = await fetchMovieRecommendations(s);
-        const titles = Array.isArray(data) ? data.map((m) => m.title).filter(Boolean) : [];
+        const titles = Array.isArray(data)
+          ? data.map((m) => m.title).filter(Boolean)
+          : [];
         const low = s.toLowerCase();
         // starts-with from backend recs
         let uniq = Array.from(new Set(titles))
@@ -211,12 +218,16 @@ export default function Movies() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-100">
-              <span role="img" aria-label="movies">🎬</span>
+              <span role="img" aria-label="movies">
+                🎬
+              </span>
               You are in Movies
             </span>
           </div>
           <div className="bg-white border rounded-xl shadow-sm p-5 md:p-6 mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Movies</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Movies
+            </h1>
             <p className="text-sm text-gray-600 mt-1">
               Search by title to get recommendations powered by your dataset.
             </p>
@@ -235,19 +246,30 @@ export default function Movies() {
                 aria-autocomplete="list"
                 aria-expanded={suggestionsOpen}
                 aria-controls="movies-sugg-list"
-                aria-activedescendant={activeIdx >= 0 ? `movie-sugg-${activeIdx}` : undefined}
+                aria-activedescendant={
+                  activeIdx >= 0 ? `movie-sugg-${activeIdx}` : undefined
+                }
               />
               {/* Suggestions */}
               {suggestionsOpen && suggestions.length > 0 && (
-                <div ref={suggRef} className="absolute z-20 left-0 right-0 top-full mt-1 rounded-lg border bg-white shadow-lg">
-                  <ul id="movies-sugg-list" role="listbox" className="max-h-64 overflow-auto py-1 text-sm">
+                <div
+                  ref={suggRef}
+                  className="absolute z-20 left-0 right-0 top-full mt-1 rounded-lg border bg-white shadow-lg"
+                >
+                  <ul
+                    id="movies-sugg-list"
+                    role="listbox"
+                    className="max-h-64 overflow-auto py-1 text-sm"
+                  >
                     {suggestions.map((t, i) => (
                       <li
                         key={`${t}-${i}`}
                         id={`movie-sugg-${i}`}
                         role="option"
                         aria-selected={i === activeIdx}
-                        className={`cursor-pointer px-3 py-2 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${i === activeIdx ? "bg-gray-200" : ""}`}
+                        className={`cursor-pointer px-3 py-2 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                          i === activeIdx ? "bg-gray-200" : ""
+                        }`}
                         onClick={() => {
                           setQuery(t);
                           setSuggestionsOpen(false);
@@ -321,11 +343,16 @@ export default function Movies() {
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-2xl font-bold mb-4">Popular Movies</h2>
           {!loadingPopular && popular.length > 0 && (
-            <MovieSlider movies={popular.slice(0, Math.min(visibleCount, popular.length))} />
+            <MovieSlider
+              movies={popular.slice(0, Math.min(visibleCount, popular.length))}
+            />
           )}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
-            {loadingPopular && popular.length === 0 &&
-              Array.from({ length: 6 }).map((_, i) => <MovieSkeleton key={i} />)}
+            {loadingPopular &&
+              popular.length === 0 &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <MovieSkeleton key={i} />
+              ))}
             {!loadingPopular &&
               popular
                 .slice(0, Math.min(visibleCount, popular.length))
@@ -335,7 +362,9 @@ export default function Movies() {
             <div className="flex justify-center mt-6">
               <button
                 className="px-6 py-3 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700"
-                onClick={() => setVisibleCount((c) => Math.min(c + 12, popular.length))}
+                onClick={() =>
+                  setVisibleCount((c) => Math.min(c + 12, popular.length))
+                }
               >
                 Load more
               </button>

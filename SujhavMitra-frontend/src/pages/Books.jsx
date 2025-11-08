@@ -6,6 +6,7 @@ import Loading from "../components/Loading";
 import { fetchPopularBooks, fetchBookRecommendations } from "../services/api";
 import "../index.css";
 import SectionHeader from "../components/SectionHeader";
+import { showToast } from "../utils/toast";
 
 export default function Books() {
   const [popularBooks, setPopularBooks] = useState([]);
@@ -32,11 +33,7 @@ export default function Books() {
 
   // Toast reminder of current section (once per mount/visit)
   useEffect(() => {
-    try {
-      window.dispatchEvent(
-        new CustomEvent("app:toast", { detail: { message: "You are in Books", variant: "info", timeout: 2200 } })
-      );
-    } catch {}
+    showToast("You are in Books");
   }, []);
 
   const clearResults = useCallback(() => {
@@ -145,7 +142,9 @@ export default function Books() {
       }
       try {
         const recs = await fetchBookRecommendations(s);
-        const titles = Array.isArray(recs) ? recs.map((r) => r.title).filter(Boolean) : [];
+        const titles = Array.isArray(recs)
+          ? recs.map((r) => r.title).filter(Boolean)
+          : [];
         const low = s.toLowerCase();
         // starts-with from backend recs
         let uniq = Array.from(new Set(titles))
@@ -153,7 +152,11 @@ export default function Books() {
           .slice(0, 8);
         // fallback to popular if backend gives nothing useful (common on 1-letter input)
         if (uniq.length === 0) {
-          const list = (Array.isArray(popularBooks) ? popularBooks : popularBooks?.popular_books || [])
+          const list = (
+            Array.isArray(popularBooks)
+              ? popularBooks
+              : popularBooks?.popular_books || []
+          )
             .map((b) => b.title || b["Book-Title"]) // normalize
             .filter(Boolean);
           uniq = Array.from(new Set(list))
@@ -202,7 +205,9 @@ export default function Books() {
           } else {
             setRecommendations(recs);
             if (!recs.length) {
-              setError("No recommendations found for this title. Try a different search term.");
+              setError(
+                "No recommendations found for this title. Try a different search term."
+              );
             }
           }
         } catch (err) {
@@ -222,12 +227,16 @@ export default function Books() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-100">
-              <span role="img" aria-label="books">📚</span>
+              <span role="img" aria-label="books">
+                📚
+              </span>
               You are in Books
             </span>
           </div>
           <div className="bg-white border rounded-xl shadow-sm p-5 md:p-6 mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Books</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Books
+            </h1>
             <p className="text-sm text-black-600 mt-1">
               Search by title to get recommendations powered by your dataset.
             </p>
@@ -246,19 +255,30 @@ export default function Books() {
                 aria-autocomplete="list"
                 aria-expanded={suggestionsOpen}
                 aria-controls="books-sugg-list"
-                aria-activedescendant={activeIdx >= 0 ? `book-sugg-${activeIdx}` : undefined}
+                aria-activedescendant={
+                  activeIdx >= 0 ? `book-sugg-${activeIdx}` : undefined
+                }
               />
               {/* Suggestions */}
               {suggestionsOpen && suggestions.length > 0 && (
-                <div ref={suggRef} className="absolute z-20 left-0 right-0 top-full mt-1 rounded-lg border bg-white shadow-lg">
-                  <ul id="books-sugg-list" role="listbox" className="max-h-64 overflow-auto py-1 text-sm">
+                <div
+                  ref={suggRef}
+                  className="absolute z-20 left-0 right-0 top-full mt-1 rounded-lg border bg-white shadow-lg"
+                >
+                  <ul
+                    id="books-sugg-list"
+                    role="listbox"
+                    className="max-h-64 overflow-auto py-1 text-sm"
+                  >
                     {suggestions.map((t, i) => (
                       <li
                         key={`${t}-${i}`}
                         id={`book-sugg-${i}`}
                         role="option"
                         aria-selected={i === activeIdx}
-                        className={`cursor-pointer px-3 py-2 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${i === activeIdx ? "bg-gray-200" : ""}`}
+                        className={`cursor-pointer px-3 py-2 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                          i === activeIdx ? "bg-gray-200" : ""
+                        }`}
                         onClick={() => {
                           setQuery(t);
                           setSuggestionsOpen(false);
