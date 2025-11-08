@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Eye, EyeOff, User } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 
@@ -8,22 +8,72 @@ const Login = ({ onToggleForm }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
 
-  const handleSubmit = async () => {
+  // Reset all form states when component mounts
+  useEffect(() => {
+    // Reset form immediately when component mounts
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+    setLoading(false);
+    setError("");
+    
+    // Also reset form when navigating to this page
+    return () => {
+      setEmail("");
+      setPassword("");
+      setShowPassword(false);
+      setLoading(false);
+      setError("");
+    };
+  }, []);
+  
+  // Handle route changes to reset form when navigating to login
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setEmail("");
+      setPassword("");
+      setShowPassword(false);
+      setLoading(false);
+      setError("");
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
+  }, []);
+
+  const handleSubmit = async (e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    if (loading) return;
+    
     setLoading(true);
     setError("");
 
-    const result = await login(email, password);
+    try {
+      const result = await login(email, password);
 
-    if (result.success) {
-      // Redirect to home page after successful login
-      window.location.href = '/';
-    } else {
-      setError(result.message || "Login failed");
+      if (result.success) {
+        // Redirect to home page after successful login
+        window.location.href = '/';
+      } else {
+        setError(result.message || "Login failed");
+      }
+    } catch (error) {
+      setError(error.message || "An error occurred during login");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
+  };
+  
+  // Handle Enter key press
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
   };
 
   return (
@@ -40,13 +90,14 @@ const Login = ({ onToggleForm }) => {
           </div>
         )}
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="w-full pl-10 pr-3 py-2 border rounded"
               placeholder="Email"
             />
@@ -57,7 +108,8 @@ const Login = ({ onToggleForm }) => {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-3 pr-10 py-2 border rounded"
+              onKeyDown={handleKeyDown}
+              className="w-full pl-4 pr-12 py-2 border rounded"
               placeholder="Password"
             />
             <button
@@ -80,7 +132,7 @@ const Login = ({ onToggleForm }) => {
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
-        </div>
+        </form>
 
         <p className="text-center mt-4 text-sm">
           Don’t have an account?{" "}

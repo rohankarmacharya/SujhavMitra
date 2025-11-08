@@ -9,8 +9,9 @@ const tabs = [
 ];
 
 export default function Wishlist() {
-  const { list, remove } = useWishlist();
+  const { list, remove, fetchWishlist } = useWishlist();
   const [filter, setFilter] = useState("all");
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const filtered = useMemo(() => {
     if (filter === "all") return list;
@@ -50,20 +51,101 @@ export default function Wishlist() {
                 {/* Remove button with stopPropagation to prevent triggering the parent click */}
                 <div className="absolute right-2 top-2 z-10">
                   <button
-                    className="px-2 py-1 text-xs rounded bg-red-50 text-red-600 ring-1 ring-red-100 hover:bg-red-100 transition-colors"
-                    onClick={(e) => {
+                    className={`px-2 py-1 text-xs rounded ring-1 transition-colors ${
+                      isRemoving 
+                        ? 'bg-gray-100 text-gray-500 ring-gray-200 cursor-not-allowed' 
+                        : 'bg-red-50 text-red-600 ring-red-100 hover:bg-red-100'
+                    }`}
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      remove(it.kind, it.key);
+                      e.preventDefault();
+                      
+                      if (isRemoving) return;
+                      
+                      try {
+                        setIsRemoving(true);
+                        
+                        // Use the item's ID if available, otherwise use the key
+                        const itemId = it.id || it.key;
+                        
+                        if (!itemId) {
+                          console.error('No ID or key found for item:', it);
+                          return;
+                        }
+                        
+                        // Call the remove function with the item ID
+                        const result = await remove(itemId);
+                        
+                        if (!result.success) {
+                          console.error('Failed to remove item:', result.error);
+                          // Show error toast
+                          window.dispatchEvent(
+                            new CustomEvent('toast', {
+                              detail: {
+                                message: result.error || 'Failed to remove item',
+                                type: 'error'
+                              }
+                            })
+                          );
+                        } else {
+                          // Refresh the wishlist
+                          await fetchWishlist();
+                          
+                          // Show success toast
+                          window.dispatchEvent(
+                            new CustomEvent('toast', {
+                              detail: {
+                                message: 'Item removed from wishlist',
+                                type: 'success'
+                              }
+                            })
+                          );
+                        }
+                      } catch (error) {
+                        console.error('Error removing item:', error);
+                        window.dispatchEvent(
+                          new CustomEvent('toast', {
+                            detail: {
+                              message: error.message || 'An error occurred while removing the item',
+                              type: 'error'
+                            }
+                          })
+                        );
+                      } finally {
+                        setIsRemoving(false);
+                      }
                     }}
+                    disabled={isRemoving}
                   >
-                    Remove
+                    {isRemoving ? 'Removing...' : 'Remove'}
                   </button>
                 </div>
                 
                 {/* Clickable area for the entire card */}
                 <Link
                   to={it.kind === 'book' ? `/book/${it.data?.isbn}` : `/movie/${it.data?.id}`}
-                  state={it.kind === 'book' ? { book: it.data } : { movie: it.data }}
+                  state={{ 
+                    movie: {
+                      ...it.data,
+                      // Ensure we have all required fields with proper fallbacks
+                      id: it.data?.id || it.key,
+                      title: it.data?.title || it.data?.name || 'Untitled',
+                      overview: it.data?.overview || it.data?.description || 'No overview available.',
+                      poster_path: it.data?.poster_path || it.data?.image || null,
+                      genres: Array.isArray(it.data?.genres) ? it.data.genres : 
+                             (typeof it.data?.genres === 'string' ? it.data.genres.split(',') : []),
+                      cast: Array.isArray(it.data?.cast) ? it.data.cast : 
+                           (typeof it.data?.cast === 'string' ? it.data.cast.split(',').map(c => c.trim()) : []),
+                      crew: it.data?.crew || 'N/A',
+                      release_date: it.data?.release_date || it.data?.year || null,
+                      vote_average: it.data?.vote_average || it.data?.rating || 0,
+                      vote_count: it.data?.vote_count || 0,
+                      runtime: it.data?.runtime || null,
+                      status: it.data?.status || 'Released',
+                      tagline: it.data?.tagline || ''
+                    },
+                    fromWishlist: true // Flag to indicate this is coming from wishlist
+                  }}
                   className="block h-full w-full no-underline"
                 >
                   <div className="space-y-2">

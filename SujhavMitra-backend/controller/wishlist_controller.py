@@ -48,8 +48,12 @@ def add_to_wishlist_controller():
     item_type = data.get('item_type')
     item_id = data.get('item_id')
     title = data.get('title')
+    
+    # Extract all other fields to be stored as item data
+    item_data = {k: v for k, v in data.items() 
+                if k not in ['item_type', 'item_id', 'title']}
 
-    return wishlist_obj.add_to_wishlist(user_id, item_type, item_id, title)
+    return wishlist_obj.add_to_wishlist(user_id, item_type, item_id, title, **item_data)
 
 
 # Get user's wishlist
