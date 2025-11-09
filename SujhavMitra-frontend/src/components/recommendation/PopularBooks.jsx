@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import RecommendationCard from "../RecommendationCard";
+import RecommendationCard from "../BookCard";
 import SectionHeader from "../SectionHeader";
 import { fetchPopularBooks } from "../../services/api";
 import "../../index.css";

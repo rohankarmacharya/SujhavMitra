@@ -100,3 +100,19 @@ export const fetchMovieById = async (id) => {
     throw new Error(err.response?.data?.error || "Failed to fetch movie");
   }
 };
+
+export const fetchReadUrlByISBN = async (isbn) => {
+  const key = `ISBN:${encodeURIComponent(isbn)}`;
+  const url = `https://openlibrary.org/api/books?bibkeys=${key}&format=json&jscmd=data`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch");
+    const data = await res.json();
+    const bookData = data[key];
+    if (!bookData) return null;
+    return bookData.url || null;
+  } catch (err) {
+    console.error("fetchReadUrlByISBN error", err);
+    return null;
+  }
+};
