@@ -16,14 +16,11 @@ const ReadNowButton = ({ isbn }) => {
   if (!readUrl) return null;
 
   return (
-    <a
-      href={readUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors"
-    >
-      Read Now
-    </a>
+    <div className="pagelink mt-4">
+      <a href={readUrl} target="_blank" rel="noopener noreferrer">
+        Read Now
+      </a>
+    </div>
   );
 };
 

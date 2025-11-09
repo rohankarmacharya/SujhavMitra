@@ -40,11 +40,11 @@ const PopularBooks = () => {
           )}
 
           {/* Responsive grid using shared Card/Badge */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {list.slice(0, 9).map((book, idx) => (
               <RecommendationCard key={book.isbn || `pb-${idx}`} item={book} />
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -3,7 +3,8 @@
   overflow-x: hidden;
 }
 
-html, body {
+html,
+body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -22,7 +23,9 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
 }
 a,
 p,
@@ -35,7 +38,9 @@ label,
 small,
 span,
 div {
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
 }
 
 .wrapper {
@@ -45,7 +50,7 @@ div {
 }
 /* =============== Section Heading =================== */
 .section-header {
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 .section-header h4 {
   font-size: 20px;
@@ -55,7 +60,7 @@ div {
 .section-header h2 {
   font-size: 28px;
   line-height: 38px;
-  margin: 15px 0;
+  margin: 10px 0;
 }
 .section-header p {
   font-size: 18px;
@@ -101,4 +106,117 @@ div {
 
 .slider:hover h3 {
   top: 100%;
+}
+
+.pagelink a {
+  text-decoration: none;
+  color: #fff;
+  background-color: #837fcb;
+  padding: 8px 20px;
+  border-radius: 25px;
+  transition: all linear 0.3s;
+}
+
+.pagelink a:hover {
+  background-color: #9b98d5;
+}
+
+/* ==== details Page ==== */
+.genre span {
+  text-transform: capitalize;
+  background-color: #837fcb;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.card-details h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.card-details p {
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.cast span {
+  text-transform: capitalize;
+  font-size: 15px;
+}
+.crew {
+  margin: 15px 0 30px;
+}
+.crew p {
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+/* ======= Crad ===== */
+.card {
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.card img {
+  width: 100%;
+}
+
+.card-content {
+  margin-top: 20px;
+}
+.card-content h2 {
+  font-style: 20px;
+}
+
+.card-content p {
+  font-style: 16px;
+  margin-top: 15px;
+}
+
+/* ===== hero section ===== */
+.hero {
+  background: url("/src/assets/hero_image.png") no-repeat top;
+  background-size: cover;
+  padding: 100px 0;
+  color: #fff;
+}
+.hero-content {
+  text-align: center;
+}
+.hero-content h4 {
+  font-style: 18px;
+  padding: 3px 11px;
+  border-radius: 25px;
+  font-weight: 400;
+  background-color: #837fcb;
+  display: inline-block;
+}
+.hero-content h1 {
+  font-size: 60px;
+  margin: 25px 0;
+}
+.hero-content p {
+  font-size: 16px;
+}
+
+.hero-content ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.hero-content ul li {
+  display: flex;
+  list-style: none;
+  gap: 10px;
+  align-items: center;
+  background-color: #fff;
+  color: #837fcb;
+  padding: 8px 15px;
+  border-radius: 22px;
 }

@@ -22,7 +22,16 @@ export default function MovieCard({ movie }) {
   // Avoid calling functions when movie is null
   const saved = movie ? isSaved("movie", id) : false;
 
-  // ✅ Hooks can have conditions inside them, but not around them
+  // Compute the link path
+  const to = id
+    ? `/movie/${id}`
+    : title
+    ? `/movie/title/${encodeURIComponent(
+        title.replace(/\s+/g, "-").toLowerCase()
+      )}`
+    : null;
+
+  // Hooks can have conditions inside them, but not around them
   useEffect(() => {
     if (!movie) return;
     let alive = true;
@@ -36,11 +45,11 @@ export default function MovieCard({ movie }) {
   }, [movie, title, year]);
 
   // Conditional rendering after hooks
-  if (!movie) return null;
+  if (!movie || !to) return null;
 
   return (
     <Card className="group relative h-full overflow-hidden transition hover:shadow-lg">
-      <Link to={`/movie/${id}`} state={{ movie }} className="block h-full">
+      <Link to={to} state={{ movie }} className="block h-full">
         <CardContent className="flex h-full flex-col">
           {/* Wishlist button */}
           <div className="absolute right-2 top-2 z-10">
@@ -119,13 +128,6 @@ export default function MovieCard({ movie }) {
           {overview && (
             <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-800">
               {overview}
-            </p>
-          )}
-
-          {/* Cast */}
-          {Array.isArray(cast) && cast.length > 0 && (
-            <p className="mt-2 truncate text-xs text-gray-600">
-              Cast: {cast.slice(0, 4).join(", ")}
             </p>
           )}
 
