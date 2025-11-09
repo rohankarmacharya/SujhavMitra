@@ -1,25 +1,12 @@
 import mysql.connector
-import json
 from flask import make_response
 from configs.config import dbconfig
+import json
 from datetime import datetime
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class WishlistModel:
     def __init__(self):
-        self.conn = None
-        self.connect()
-
-    def connect(self):
-        """Establish database connection"""
         try:
-            if self.conn and self.conn.is_connected():
-                return True
-                
             self.conn = mysql.connector.connect(
                 host=dbconfig["host"],
                 port=dbconfig["port"],
@@ -28,218 +15,191 @@ class WishlistModel:
                 database=dbconfig["database"],
                 autocommit=True
             )
-            logger.info("Successfully connected to the database")
-            return True
-        except mysql.connector.Error as err:
-            logger.error(f"Database connection error: {err}")
+            print("Wishlist DB Connection established")
+        except Exception as e:
+            print(f"Error connecting to wishlist database: {e}")
             self.conn = None
-            return False
-
-    def execute_query(self, query, params=None, fetch=True):
-        """Execute a database query with error handling and reconnection"""
-        max_retries = 2
-        for attempt in range(max_retries):
-            try:
-                if not self.connect():
-                    raise Exception("Failed to connect to database")
-                    
-                cursor = self.conn.cursor(dictionary=True)
-                cursor.execute(query, params or ())
-                
-                if fetch:
-                    result = cursor.fetchall()
-                    cursor.close()
-                    return result
-                
-                cursor.close()
-                return True
-                
-            except mysql.connector.Error as err:
-                logger.error(f"Database error (attempt {attempt + 1}): {err}")
-                self.conn = None  # Force reconnection on next attempt
-                if attempt == max_retries - 1:  # Last attempt
-                    raise
 
     def log_activity(self, user_id, action):
-        """Log user activity to sm_user_activity table"""
+        """Log user activity"""
+        if not self.conn:
+            return
         try:
-            query = """
-                INSERT INTO sm_user_activity (user_id, action, timestamp) 
-                VALUES (%s, %s, %s)
-            """
-            self.execute_query(query, (user_id, action, datetime.now()), fetch=False)
+            cursor = self.conn.cursor()
+            query = "INSERT INTO sm_user_activity (user_id, action, timestamp) VALUES (%s, %s, %s)"
+            cursor.execute(query, (user_id, action, datetime.now()))
+            cursor.close()
         except Exception as e:
-            logger.error(f"Error logging activity: {e}")
+            print(f"Error logging activity: {e}")
 
-    def add_to_wishlist(self, user_id, item_type, item_id, title, **kwargs):
-        """
-        Add a book or movie to user's wishlist
-        
-        Args:
-            user_id: The ID of the user
-            item_type: Type of the item ('book' or 'movie')
-            item_id: ID of the item
-            title: Title of the item
-            **kwargs: Additional item data to be stored as JSON
-            
-        Returns:
-            Response with success/error message
-        """
-        # Validate item_type
-        if item_type not in ['book', 'movie']:
-            return make_response({"error": "Invalid item type. Must be 'book' or 'movie'"}, 400)
-
-        # Validate required fields
-        if not item_id or not title:
-            return make_response({"error": "item_id and title are required"}, 400)
+    def add_to_wishlist(self, user_id, item_type, item_id, title, **item_data):
+        """Add item to wishlist"""
+        if not self.conn:
+            return make_response({"error": "Database connection not established"}, 500)
 
         try:
+            # Validate required fields
+            if not item_type or not item_id or not title:
+                return make_response({"error": "item_type, item_id, and title are required"}, 400)
+
+            if item_type not in ['book', 'movie']:
+                return make_response({"error": "item_type must be 'book' or 'movie'"}, 400)
+
+            cursor = self.conn.cursor(dictionary=True)
+
             # Check if item already exists in wishlist
             check_query = """
                 SELECT id FROM sm_wishlist 
                 WHERE user_id = %s AND item_type = %s AND item_id = %s
             """
-            existing = self.execute_query(check_query, (user_id, item_type, item_id))
+            cursor.execute(check_query, (user_id, item_type, item_id))
+            existing = cursor.fetchone()
 
-            if existing and len(existing) > 0:
-                return make_response({"message": "Item already in wishlist"}, 200)
+            if existing:
+                cursor.close()
+                return make_response({"message": "Item already in wishlist", "wishlist_id": existing['id']}, 200)
 
-            # Prepare item data
-            item_data = {
-                'id': item_id,
-                'title': title,
-                'type': item_type,
-                **{k: v for k, v in kwargs.items() if v is not None}  # Include any additional fields
-            }
-            
-            # Add to wishlist with complete data
+            # Store additional data as JSON
+            data_json = json.dumps(item_data) if item_data else None
+
+            # Insert new wishlist item
             insert_query = """
-                INSERT INTO sm_wishlist 
-                (user_id, item_type, item_id, title, data, added_at) 
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO sm_wishlist (user_id, item_type, item_id, title, data) 
+                VALUES (%s, %s, %s, %s, %s)
             """
-            self.execute_query(
-                insert_query, 
-                (user_id, item_type, item_id, title, json.dumps(item_data), datetime.now()),
-                fetch=False
-            )
+            cursor.execute(insert_query, (user_id, item_type, item_id, title, data_json))
+            
+            wishlist_id = cursor.lastrowid
+            cursor.close()
 
             # Log activity
             self.log_activity(user_id, f"Added {item_type} '{title}' to wishlist")
 
             return make_response({
-                "message": f"{item_type.capitalize()} added to wishlist successfully",
-                "status": "success"
+                "message": "Item added to wishlist successfully",
+                "wishlist_id": wishlist_id
             }, 201)
 
+        except mysql.connector.IntegrityError as e:
+            print(f"Integrity error in add_to_wishlist: {e}")
+            return make_response({"error": "Item already exists in wishlist"}, 400)
         except Exception as e:
-            logger.error(f"Error in add_to_wishlist: {str(e)}")
-            return make_response({
-                "error": "Failed to add to wishlist",
-                "details": str(e)
-            }, 500)
+            print(f"Error adding to wishlist: {e}")
+            import traceback
+            traceback.print_exc()
+            return make_response({"error": f"Failed to add to wishlist: {str(e)}"}, 500)
 
     def get_wishlist(self, user_id, item_type=None):
-        """Get user's wishlist, optionally filtered by item_type"""
+        """Get user's wishlist"""
+        if not self.conn:
+            return make_response({"error": "Database connection not established"}, 500)
+
         try:
-            if item_type and item_type not in ['book', 'movie']:
-                return make_response({
-                    "error": "Invalid item type. Must be 'book' or 'movie'"
-                }, 400)
-            
-            # Get wishlist items with their data
+            cursor = self.conn.cursor(dictionary=True)
+
+            # Build query based on filter
             if item_type:
                 query = """
-                    SELECT id, item_type, item_id, title, data, added_at 
+                    SELECT id, user_id, item_type, item_id, title, data, added_at 
                     FROM sm_wishlist 
-                    WHERE user_id = %s AND item_type = %s
+                    WHERE user_id = %s AND item_type = %s 
                     ORDER BY added_at DESC
                 """
-                items = self.execute_query(query, (user_id, item_type)) or []
+                cursor.execute(query, (user_id, item_type))
             else:
                 query = """
-                    SELECT id, item_type, item_id, title, data, added_at 
+                    SELECT id, user_id, item_type, item_id, title, data, added_at 
                     FROM sm_wishlist 
-                    WHERE user_id = %s
+                    WHERE user_id = %s 
                     ORDER BY added_at DESC
                 """
-                items = self.execute_query(query, (user_id,)) or []
+                cursor.execute(query, (user_id,))
+
+            results = cursor.fetchall()
+            cursor.close()
+
+            # Parse JSON data field for each item
+            wishlist_items = []
+            for row in results:
+                item = {
+                    'id': row['id'],
+                    'item_type': row['item_type'],
+                    'item_id': row['item_id'],
+                    'title': row['title'],
+                    'added_at': row['added_at'].isoformat() if row['added_at'] else None,
+                    'data': {}
+                }
                 
-            # Merge data with item details if available
-            for item in items:
-                if item.get('data') and isinstance(item['data'], str):
+                # Parse the data JSON field
+                if row['data']:
                     try:
-                        item['data'] = json.loads(item['data'])
-                    except (json.JSONDecodeError, TypeError):
-                        # If data is not valid JSON, keep it as is
-                        pass
+                        item['data'] = json.loads(row['data']) if isinstance(row['data'], str) else row['data']
+                    except json.JSONDecodeError:
+                        print(f"Warning: Could not parse data for wishlist item {row['id']}")
+                        item['data'] = {}
+                
+                wishlist_items.append(item)
+
+            # Log activity
+            self.log_activity(user_id, "Viewed wishlist")
 
             return make_response({
-                "wishlist": items,
-                "count": len(items)
+                "wishlist": wishlist_items,
+                "count": len(wishlist_items)
             }, 200)
 
         except Exception as e:
-            logger.error(f"Error in get_wishlist: {str(e)}")
-            return make_response({
-                "error": "Failed to fetch wishlist",
-                "details": str(e)
-            }, 500)
+            print(f"Error fetching wishlist: {e}")
+            import traceback
+            traceback.print_exc()
+            return make_response({"error": f"Failed to fetch wishlist: {str(e)}"}, 500)
 
     def remove_from_wishlist(self, user_id, wishlist_id):
-        """Remove a specific item from wishlist by its wishlist ID"""
+        """Remove item from wishlist by wishlist ID"""
+        if not self.conn:
+            return make_response({"error": "Database connection not established"}, 500)
+
         try:
-            # First get the item details for logging
-            get_query = """
-                SELECT id, item_type, title, user_id 
+            cursor = self.conn.cursor(dictionary=True)
+
+            # Get item details before deletion for logging
+            select_query = """
+                SELECT item_type, title 
                 FROM sm_wishlist 
                 WHERE id = %s AND user_id = %s
             """
-            item = self.execute_query(get_query, (wishlist_id, user_id))
-            
-            if not item or len(item) == 0:
-                return make_response({
-                    "error": "Item not found in wishlist"
-                }, 404)
+            cursor.execute(select_query, (wishlist_id, user_id))
+            item = cursor.fetchone()
 
-            item = item[0]  # Get the first (and should be only) result
+            if not item:
+                cursor.close()
+                return make_response({"error": "Item not found in wishlist"}, 404)
 
             # Delete the item
-            delete_query = """
-                DELETE FROM sm_wishlist 
-                WHERE id = %s AND user_id = %s
-            """
-            self.execute_query(delete_query, (wishlist_id, user_id), fetch=False)
+            delete_query = "DELETE FROM sm_wishlist WHERE id = %s AND user_id = %s"
+            cursor.execute(delete_query, (wishlist_id, user_id))
+            cursor.close()
 
             # Log activity
-            self.log_activity(
-                user_id, 
-                f"Removed {item['item_type']} '{item['title']}' from wishlist"
-            )
+            self.log_activity(user_id, f"Removed {item['item_type']} '{item['title']}' from wishlist")
 
-            return make_response({
-                "message": "Item removed from wishlist",
-                "status": "success"
-            }, 200)
+            return make_response({"message": "Item removed from wishlist successfully"}, 200)
 
         except Exception as e:
-            logger.error(f"Error in remove_from_wishlist: {str(e)}")
-            return make_response({
-                "error": "Failed to remove item from wishlist",
-                "details": str(e)
-            }, 500)
+            print(f"Error removing from wishlist: {e}")
+            import traceback
+            traceback.print_exc()
+            return make_response({"error": f"Failed to remove from wishlist: {str(e)}"}, 500)
 
     def clear_wishlist(self, user_id, item_type=None):
-        """Clear user's entire wishlist or by type"""
+        """Clear user's wishlist (optionally by type)"""
+        if not self.conn:
+            return make_response({"error": "Database connection not established"}, 500)
+
         try:
             cursor = self.conn.cursor()
 
             if item_type:
-                # Validate item_type
-                if item_type not in ['book', 'movie']:
-                    cursor.close()
-                    return make_response({"error": "Invalid item type. Must be 'book' or 'movie'"}, 400)
-                
                 query = "DELETE FROM sm_wishlist WHERE user_id = %s AND item_type = %s"
                 cursor.execute(query, (user_id, item_type))
                 action = f"Cleared all {item_type}s from wishlist"
@@ -248,23 +208,25 @@ class WishlistModel:
                 cursor.execute(query, (user_id,))
                 action = "Cleared entire wishlist"
 
-            affected_rows = cursor.rowcount
+            deleted_count = cursor.rowcount
             cursor.close()
 
             # Log activity
             self.log_activity(user_id, action)
 
             return make_response({
-                "message": "Wishlist cleared successfully",
-                "items_removed": affected_rows
+                "message": f"Wishlist cleared successfully",
+                "deleted_count": deleted_count
             }, 200)
 
         except Exception as e:
             print(f"Error clearing wishlist: {e}")
-            return make_response({"error": "Failed to clear wishlist"}, 500)
+            import traceback
+            traceback.print_exc()
+            return make_response({"error": f"Failed to clear wishlist: {str(e)}"}, 500)
 
     def get_user_activity(self, user_id, limit=50):
-        """Get user activity log"""
+        """Get user's activity log"""
         if not self.conn:
             return make_response({"error": "Database connection not established"}, 500)
 
@@ -274,13 +236,18 @@ class WishlistModel:
             query = """
                 SELECT id, action, timestamp 
                 FROM sm_user_activity 
-                WHERE user_id = %s
-                ORDER BY timestamp DESC
+                WHERE user_id = %s 
+                ORDER BY timestamp DESC 
                 LIMIT %s
             """
             cursor.execute(query, (user_id, limit))
             activities = cursor.fetchall()
             cursor.close()
+
+            # Convert timestamps to ISO format
+            for activity in activities:
+                if activity['timestamp']:
+                    activity['timestamp'] = activity['timestamp'].isoformat()
 
             return make_response({
                 "activities": activities,
@@ -289,4 +256,6 @@ class WishlistModel:
 
         except Exception as e:
             print(f"Error fetching user activity: {e}")
-            return make_response({"error": "Failed to fetch user activity"}, 500)
+            import traceback
+            traceback.print_exc()
+            return make_response({"error": f"Failed to fetch activity: {str(e)}"}, 500)

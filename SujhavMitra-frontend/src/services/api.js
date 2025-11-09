@@ -9,7 +9,9 @@ export const resolvePosterUrl = (value) => {
   if (/^https?:\/\//i.test(str) || str.startsWith("data:")) return str;
   if (!POSTER_BASE) return str; // fallback as-is
   // ensure exactly one slash between base and path
-  const base = POSTER_BASE.endsWith("/") ? POSTER_BASE.slice(0, -1) : POSTER_BASE;
+  const base = POSTER_BASE.endsWith("/")
+    ? POSTER_BASE.slice(0, -1)
+    : POSTER_BASE;
   const path = str.startsWith("/") ? str : `/${str}`;
   return `${base}${path}`;
 };
@@ -61,7 +63,9 @@ export const fetchBookByTitle = async (title) => {
     return res.data;
   } catch (err) {
     console.error("Error fetching book by title:", err);
-    throw new Error(err.response?.data?.error || "Failed to fetch book by title");
+    throw new Error(
+      err.response?.data?.error || "Failed to fetch book by title"
+    );
   }
 };
 
