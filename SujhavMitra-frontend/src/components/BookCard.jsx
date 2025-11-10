@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import WishlistButton from "./ui/WishlistButton";
 
 const RecommendationCard = ({ item }) => {
+  const { user } = useAuth();
   const hasIsbn = Boolean(item.isbn);
   const hasTitle = Boolean(item.title);
 
@@ -21,13 +23,15 @@ const RecommendationCard = ({ item }) => {
       <div className="relative w-full aspect-[2/3] overflow-hidden">
         <img src={coverUrl} alt={item.title} loading="lazy" />
         {/* Wishlist Button (top-right corner of the image) */}
-        <div className="absolute top-2 right-2 z-10">
-          <WishlistButton
-            type="book"
-            id={item.isbn || item.title}
-            item={item}
-          />
-        </div>
+        {user && user.role_id === 3 && (
+          <div className="absolute top-2 right-2 z-10">
+            <WishlistButton
+              type="book"
+              id={item.isbn || item.title}
+              item={item}
+            />
+          </div>
+        )}
       </div>
 
       {/*Text content */}

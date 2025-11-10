@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import {
   fetchBookById,
   fetchBookByTitle,
@@ -14,6 +15,7 @@ import SectionHeader from "../components/SectionHeader";
 import RelatedBooks from "../components/RelatedBooks";
 
 const BookDetails = () => {
+  const { user } = useAuth();
   const { isbn, slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -103,11 +105,13 @@ const BookDetails = () => {
           <div className="md:col-span-2">
             <div className="flex items-start justify-between gap-3">
               <SectionHeader title={book.title} />
-              <WishlistButton
-                type="book"
-                id={book.isbn || book.title}
-                item={book}
-              />
+              {user && user.role_id === 3 && (
+                <WishlistButton
+                  type="book"
+                  id={book.isbn || book.title}
+                  item={book}
+                />
+              )}
             </div>
 
             {/* Author */}

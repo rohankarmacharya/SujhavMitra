@@ -1,10 +1,44 @@
+import { useAuth } from "../context/useAuth";
+
 const Hero = () => {
+  const { user } = useAuth();
+
+  const getDisplayName = () => {
+    if (!user) return "Guest";
+
+    const capitalizeWords = (str) =>
+      str
+        .split(" ")
+        .filter(Boolean)
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
+
+    const full = user.full_name || user.fullName || user.name;
+    const first = user.first_name || user.firstName;
+    const last = user.last_name || user.lastName;
+    const email = user.email || user.username || "";
+
+    if (full && typeof full === "string") return capitalizeWords(full);
+    if (first || last)
+      return capitalizeWords([first, last].filter(Boolean).join(" "));
+    if (typeof email === "string" && email.includes("@")) {
+      const local = email.split("@")[0].replace(/[0-9]+$/g, "");
+      const parts = local.split(/[._-]+/).filter(Boolean);
+      if (parts.length > 0) return capitalizeWords(parts.join(" "));
+      return capitalizeWords(local);
+    }
+    return "User";
+  };
+
   return (
     <section className="hero">
       <div className="wrapper">
         <div className="hero-content">
           <h4>Smart Recommendations</h4>
-          <h1>SujhavMitra</h1>
+          <h1>Welcome to SujhavMitra - {getDisplayName()}</h1>
+
           <p>
             Personalized suggestions for the books you love and the movies
             you’ll enjoy next.

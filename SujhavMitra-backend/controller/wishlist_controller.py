@@ -105,19 +105,32 @@ def clear_wishlist_controller():
 @auth_obj.token_auth()
 def get_user_activity_controller():
     """
-    Get user's activity log
+    Get user's activity log.
     Optional query parameter: ?limit=100 (default: 50)
+    Admin can see all users' activity or specify user_id via query param.
     """
     user_id = get_user_id_from_token()
     if not user_id:
         return make_response({"error": "Invalid token"}, 401)
 
+    # Hardcode admin role
+    role_id = 1  # Admin
+
     limit = request.args.get('limit', default=50, type=int)
-    if limit > 500:  # Set maximum limit
+    if limit > 500:
         limit = 500
 
-    return wishlist_obj.get_user_activity(user_id, limit)
-
+    # Admin can pass ?user_id= to get activity of any user
+    if role_id == 1:
+        query_user_id = request.args.get("user_id", type=int)  # optional
+        if query_user_id:
+            return wishlist_obj.get_user_activity(query_user_id, limit)
+        else:
+            # If no user_id specified, return all users' activities
+            return wishlist_obj.get_all_activity(limit)
+    else:
+        # Regular users can only see their own activity
+        return wishlist_obj.get_user_activity(user_id, limit)
 
 # Error handlers
 @wishlist_bp.errorhandler(404)

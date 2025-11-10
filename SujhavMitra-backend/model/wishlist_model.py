@@ -263,22 +263,20 @@ class WishlistModel:
             print(f"Error clearing wishlist: {e}")
             return make_response({"error": "Failed to clear wishlist"}, 500)
 
-    def get_user_activity(self, user_id, limit=50):
-        """Get user activity log"""
+    def get_all_activity(self, limit=50):
+        """Get activity logs of all users (admin only)"""
         if not self.conn:
             return make_response({"error": "Database connection not established"}, 500)
 
         try:
             cursor = self.conn.cursor(dictionary=True)
-
             query = """
-                SELECT id, action, timestamp 
-                FROM sm_user_activity 
-                WHERE user_id = %s
+                SELECT id, user_id, action, timestamp
+                FROM sm_user_activity
                 ORDER BY timestamp DESC
                 LIMIT %s
             """
-            cursor.execute(query, (user_id, limit))
+            cursor.execute(query, (limit,))
             activities = cursor.fetchall()
             cursor.close()
 
@@ -286,7 +284,6 @@ class WishlistModel:
                 "activities": activities,
                 "count": len(activities)
             }, 200)
-
         except Exception as e:
-            print(f"Error fetching user activity: {e}")
-            return make_response({"error": "Failed to fetch user activity"}, 500)
+            print(f"Error fetching all user activity: {e}")
+            return make_response({"error": "Failed to fetch activity"}, 500)

@@ -133,145 +133,129 @@ const Header = () => {
           </nav>
 
           {/* Wishlist + Auth Section */}
+
           <div className="flex gap-4 items-center">
             {/* Wishlist quick */}
-            <div className="relative" ref={wlRef}>
-              <button
-                className="relative rounded-full p-2 ring-1 ring-gray-200 hover:bg-rose-50 hover:ring-rose-200 hover:scale-110 transition-all duration-200"
-                onClick={() => setWlOpen((v) => !v)}
-                aria-haspopup="true"
-                aria-expanded={wlOpen}
-                aria-label={`Wishlist (${count} items)`}
-              >
-                <span className="sr-only">Open wishlist</span>
-                {/* Heart icon */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className={`h-6 w-6 ${
-                    wlOpen ? "text-rose-600" : "text-gray-700"
-                  } hover:text-rose-600 transition-colors`}
+            {user && user.role_id === 3 && (
+              <div className="relative" ref={wlRef}>
+                <button
+                  className="relative rounded-full p-2 ring-1 ring-gray-200 hover:bg-rose-50 hover:ring-rose-200 hover:scale-110 transition-all duration-200"
+                  onClick={() => setWlOpen((v) => !v)}
+                  aria-haspopup="true"
+                  aria-expanded={wlOpen}
+                  aria-label={`Wishlist (${count} items)`}
                 >
-                  <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.203 3 12.92 3 10.5 3 8.014 4.99 6 7.5 6c1.473 0 2.77.633 3.5 1.938C11.73 6.633 13.027 6 14.5 6 17.01 6 19 8.014 19 10.5c0 2.42-1.688 4.703-3.989 6.007a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.218l-.022.012-.007.003-.003.002a.75.75 0 01-.704 0l-.003-.002z" />
-                </svg>
-                {count > 0 && (
-                  <span className="absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                    {count}
-                  </span>
-                )}
-              </button>
-              {/* Dropdown */}
-              {wlOpen && (
-                <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1rem)] rounded-xl border bg-white p-3 shadow-xl z-50">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="font-semibold text-gray-900">Wishlist</div>
-                    <Link
-                      to="/profile"
-                      className="text-xs text-cyan-700 hover:underline"
-                      onClick={() => setWlOpen(false)}
-                    >
-                      View all
-                    </Link>
-                  </div>
-                  {list.length === 0 ? (
-                    <div className="text-sm text-gray-600 py-4 text-center">
-                      No items yet.
+                  <span className="sr-only">Open wishlist</span>
+                  {/* Heart icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className={`h-6 w-6 ${
+                      wlOpen ? "text-rose-600" : "text-gray-700"
+                    } hover:text-rose-600 transition-colors`}
+                  >
+                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.203 3 12.92 3 10.5 3 8.014 4.99 6 7.5 6c1.473 0 2.77.633 3.5 1.938C11.73 6.633 13.027 6 14.5 6 17.01 6 19 8.014 19 10.5c0 2.42-1.688 4.703-3.989 6.007a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.218l-.022.012-.007.003-.003.002a.75.75 0 01-.704 0l-.003-.002z" />
+                  </svg>
+                  {count > 0 && (
+                    <span className="absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {count}
+                    </span>
+                  )}
+                </button>
+                {/* Dropdown */}
+                {wlOpen && (
+                  <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1rem)] rounded-xl border bg-white p-3 shadow-xl z-50">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="font-semibold text-gray-900">
+                        Wishlist
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="text-xs text-cyan-700 hover:underline"
+                        onClick={() => setWlOpen(false)}
+                      >
+                        View all
+                      </Link>
                     </div>
-                  ) : (
-                    <ul className="divide-y divide-gray-100 max-h-80 overflow-auto pr-1">
-                      {list.slice(0, 6).map((it) => (
-                        <li key={`${it.kind}-${it.key}`} className="group">
-                          <button
-                            onClick={() => handleWishlistItemClick(it)}
-                            className="w-full text-left block px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 group-hover:bg-gray-50"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 min-w-0">
-                                <div className="text-xs font-medium uppercase text-gray-500 mb-0.5">
-                                  {it.kind === "book" ? "📚 Book" : "🎬 Movie"}
-                                </div>
-                                <div className="text-sm font-medium text-gray-900 truncate group-hover:text-cyan-600 transition-colors">
-                                  {it.data?.title ||
-                                    it.data?.name ||
-                                    "Untitled"}
-                                </div>
-                                {it.kind === "book" && it.data?.author && (
-                                  <div className="text-xs text-gray-500 mt-0.5 truncate">
-                                    by {it.data.author}
+                    {list.length === 0 ? (
+                      <div className="text-sm text-gray-600 py-4 text-center">
+                        No items yet.
+                      </div>
+                    ) : (
+                      <ul className="divide-y divide-gray-100 max-h-80 overflow-auto pr-1">
+                        {list.slice(0, 6).map((it) => (
+                          <li key={`${it.kind}-${it.key}`} className="group">
+                            <button
+                              onClick={() => handleWishlistItemClick(it)}
+                              className="w-full text-left block px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 group-hover:bg-gray-50"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-medium uppercase text-gray-500 mb-0.5">
+                                    {it.kind === "book"
+                                      ? "📚 Book"
+                                      : "🎬 Movie"}
                                   </div>
-                                )}
-                                {it.kind === "movie" &&
-                                  it.data?.release_date && (
+                                  <div className="text-sm font-medium text-gray-900 truncate group-hover:text-cyan-600 transition-colors">
+                                    {it.data?.title ||
+                                      it.data?.name ||
+                                      "Untitled"}
+                                  </div>
+                                  {it.kind === "book" && it.data?.author && (
                                     <div className="text-xs text-gray-500 mt-0.5 truncate">
-                                      {new Date(
-                                        it.data.release_date
-                                      ).getFullYear()}
+                                      by {it.data.author}
                                     </div>
                                   )}
+                                  {it.kind === "movie" &&
+                                    it.data?.release_date && (
+                                      <div className="text-xs text-gray-500 mt-0.5 truncate">
+                                        {new Date(
+                                          it.data.release_date
+                                        ).getFullYear()}
+                                      </div>
+                                    )}
+                                </div>
+                                <div className="ml-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <svg
+                                    className="h-4 w-4 text-gray-400 group-hover:text-cyan-500 transition-colors"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
+                                  </svg>
+                                </div>
                               </div>
-                              <div className="ml-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <svg
-                                  className="h-4 w-4 text-gray-400 group-hover:text-cyan-500 transition-colors"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 5l7 7-7 7"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                      {list.length > 6 && (
-                        <li className="pt-2">
-                          <Link
-                            to="/profile"
-                            onClick={() => setWlOpen(false)}
-                            className="block text-center text-xs text-cyan-700 hover:underline py-1"
-                          >
-                            View {list.length - 6} more items
-                          </Link>
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
+                            </button>
+                          </li>
+                        ))}
+                        {list.length > 6 && (
+                          <li className="pt-2">
+                            <Link
+                              to="/profile"
+                              onClick={() => setWlOpen(false)}
+                              className="block text-center text-xs text-cyan-700 hover:underline py-1"
+                            >
+                              View {list.length - 6} more items
+                            </Link>
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Auth Buttons */}
             {user ? (
               <>
-                <span className="text-gray-700 text-sm hidden sm:inline">
-                  Hi,{" "}
-                  {(() => {
-                    const full = user.full_name || user.fullName || user.name;
-                    const first = user.first_name || user.firstName;
-                    const last = user.last_name || user.lastName;
-                    const email = user.email || user.username || "";
-                    if (full && typeof full === "string") return full;
-                    if (first || last)
-                      return [first, last].filter(Boolean).join(" ");
-                    if (typeof email === "string" && email.includes("@")) {
-                      const local = email.split("@")[0].replace(/[0-9]+$/g, "");
-                      const parts = local.split(/[._-]+/).filter(Boolean);
-                      if (parts.length > 0) {
-                        return parts
-                          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-                          .join(" ");
-                      }
-                      return local.charAt(0).toUpperCase() + local.slice(1);
-                    }
-                    return "User";
-                  })()}
-                </span>
                 <button
                   onClick={logout}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm transition-colors"
