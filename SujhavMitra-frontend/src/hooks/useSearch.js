@@ -9,6 +9,7 @@ export default function useSearch({
   fetchRecommendations,
   fetchPopularItems,
   onError,
+  onSearchComplete, // New callback for when search completes
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -30,6 +31,27 @@ export default function useSearch({
       setResults([]);
 
       try {
+        // First, try to find the exact movie from popular items
+        let searchedMovie = null;
+
+        if (fetchPopularItems) {
+          const popularItems = await fetchPopularItems();
+          if (Array.isArray(popularItems)) {
+            // Try exact match first
+            searchedMovie = popularItems.find(
+              (item) => item.title?.toLowerCase() === q.toLowerCase()
+            );
+
+            // If no exact match, try partial match
+            if (!searchedMovie) {
+              searchedMovie = popularItems.find((item) =>
+                item.title?.toLowerCase().includes(q.toLowerCase())
+              );
+            }
+          }
+        }
+
+        // Then get recommendations
         const data = await fetchRecommendations(q);
 
         if (data.error) {
@@ -37,8 +59,28 @@ export default function useSearch({
           setResults([]);
         } else {
           setResults(data);
-          if (!data.length) {
-            setError("No recommendations found. Try a different search term.");
+
+          // If we didn't find the movie in popular items, try to find it in recommendations
+          if (!searchedMovie && Array.isArray(data) && data.length > 0) {
+            searchedMovie = data.find(
+              (item) => item.title?.toLowerCase() === q.toLowerCase()
+            );
+
+            // If still not found, try partial match in recommendations
+            if (!searchedMovie) {
+              searchedMovie = data.find((item) =>
+                item.title?.toLowerCase().includes(q.toLowerCase())
+              );
+            }
+          }
+
+          if (!searchedMovie && (!data || data.length === 0)) {
+            setError("No movie found. Try a different search term.");
+          } else {
+            // Call the completion callback with the searched movie and recommendations
+            if (onSearchComplete) {
+              onSearchComplete(data, searchedMovie);
+            }
           }
         }
       } catch (err) {
@@ -49,7 +91,7 @@ export default function useSearch({
         setLoading(false);
       }
     },
-    [query, fetchRecommendations, onError]
+    [query, fetchRecommendations, fetchPopularItems, onError, onSearchComplete]
   );
 
   const handleClear = useCallback(() => {

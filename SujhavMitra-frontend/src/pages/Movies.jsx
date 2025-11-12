@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchPopularMovies, fetchMovieRecommendations } from "../services/api";
 import MovieCard from "../components/MovieCard";
 import SectionHeader from "../components/SectionHeader";
@@ -8,14 +9,14 @@ import Badge from "../components/ui/Badge";
 import { Card, CardContent } from "../components/ui/Card";
 import useSearch from "../hooks/useSearch";
 import { showToast } from "../utils/toast";
-import Skeleton from "../components/Skeleton";
 import PopularMovies from "../components/recommendation/PopularMovies";
 
 export default function Movies() {
+  const navigate = useNavigate();
+
   const {
     query,
     setQuery,
-    results: recommendations,
     suggestions,
     loading,
     error,
@@ -26,6 +27,18 @@ export default function Movies() {
     fetchRecommendations: fetchMovieRecommendations,
     fetchPopularItems: fetchPopularMovies,
     onError: (err) => console.error("Movie search error:", err),
+    onSearchComplete: (allResults, searchedMovie) => {
+      // Redirect to the searched movie's detail page with all recommendations
+      const movieToShow = searchedMovie || allResults[0];
+      if (movieToShow && movieToShow.id) {
+        navigate(`/movie/${movieToShow.id}`, {
+          state: {
+            movieData: movieToShow,
+            allRecommendations: allResults,
+          },
+        });
+      }
+    },
   });
 
   // Toast reminder
@@ -54,7 +67,7 @@ export default function Movies() {
                 Movies
               </h1>
               <p className="text-sm text-gray-600 mt-1">
-                Search by title to get recommendations powered by your dataset.
+                Search by title to get movie details and recommendations.
               </p>
 
               <div className="mt-5">
@@ -76,25 +89,8 @@ export default function Movies() {
 
           {loading && (
             <section className="mb-8">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={`search-skeleton-${i}`} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {recommendations && recommendations.length > 0 && (
-            <section className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Recommendations ({recommendations.length})
-                </h2>
-              </div>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {recommendations.map((movie, idx) => (
-                  <MovieCard key={movie.id || idx} movie={movie} />
-                ))}
+              <div className="flex items-center justify-center py-8">
+                <div className="text-gray-600">Searching for movie...</div>
               </div>
             </section>
           )}

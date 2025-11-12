@@ -35,7 +35,7 @@ export default function RelatedMovies({
         let sorted = filtered;
 
         // Limit to 6 related movies
-        setRelatedMovies(sorted.slice(0, 10));
+        setRelatedMovies(sorted.slice(0, 9));
       } catch (err) {
         console.error("Error fetching related movies:", err);
         setError("Failed to load related movies");
