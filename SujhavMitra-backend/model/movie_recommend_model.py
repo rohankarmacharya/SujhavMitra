@@ -2,6 +2,7 @@ import pickle
 from flask import make_response
 import numpy as np
 import ast
+import pandas as pd
 
 
 class MovieRecommendModel:
@@ -14,7 +15,12 @@ class MovieRecommendModel:
         with open("models/similarity_movies.pkl", "rb") as f:
             self.similarity = pickle.load(f)
 
+        homepage_df["movie_id"] = homepage_df["movie_id"].astype(int)
+        self.movies["movie_id"] = self.movies["movie_id"].astype(int)
+
         self.movie_homepage_link = dict(zip(homepage_df['movie_id'], homepage_df['homepage']))
+        self.cast_lookup = dict(zip(homepage_df["movie_id"], homepage_df["cast_original"]))
+        self.crew_lookup = dict(zip(homepage_df["movie_id"], homepage_df["crew_original"]))
 
         # Preprocess and cache normalized titles
         self.movies["normalized_title"] = self.movies["title"].str.lower().str.strip()
@@ -26,17 +32,15 @@ class MovieRecommendModel:
             parsed = ast.literal_eval(val)
             if isinstance(parsed, list):
                 return parsed
-        except:
+        except Exception:
             pass
         return val
 
     # Format a row from the movies data into a dictionary for API response. Parse fields like 'cast' and 'genres' that may be stored as stringified lists. Handle 'overview' that might be a list or a string.
     def format_movie_row(self, row):
-        # Parse cast and genres fields if stored as string representations of lists
-        cast = self.safe_parse_list(row["cast"])
+        # cast = self.safe_parse_list(row["cast"])
         genres = self.safe_parse_list(row["genres"])
 
-        # Join overview if it is a list, else keep as string
         overview = row["overview"]
         if isinstance(overview, list):
             overview = " ".join(str(word) for word in overview)
@@ -47,26 +51,30 @@ class MovieRecommendModel:
             "title": str(row["title"]),
             "overview": overview,
             "genres": genres,
-            "cast": cast,
-            "crew": str(row["crew"]),
+            # "cast": cast,
+            # "crew": str(row["crew"]),
+            "cast": self.cast_lookup.get(movie_id),
+            "crew": self.crew_lookup.get(movie_id)
         }
-         # Fetch homepage from DataFrame
-        movie["homepage"] = self.movie_homepage_link.get(movie_id, None)
 
+        # Add homepage link
+        homepage = self.movie_homepage_link.get(movie_id)
+        movie["homepage"] = None if pd.isna(homepage) else homepage
 
-        # Optional poster/image fields if present in data
-        # Common columns: poster_path, poster_url, image_url, backdrop_path
+        # Add poster/image if available
         for col in ["poster_url", "poster_path", "image_url", "backdrop_path"]:
             if col in row and not (
                 row[col] is None or (isinstance(row[col], float) and np.isnan(row[col]))
             ):
-                try:
-                    movie["image"] = str(row[col])
-                    break
-                except Exception:
-                    pass
+                movie["image"] = str(row[col])
+                break
+
+        # Add popularity and vote_average here
+        movie["popularity"] = float(row["popularity"]) if "popularity" in row and not np.isnan(row["popularity"]) else None
+        movie["vote_average"] = float(row["vote_average"]) if "vote_average" in row and not np.isnan(row["vote_average"]) else None
 
         return movie
+
 
     # Get the first 15 unique movies
     def get_all_movie_titles(self):
@@ -113,20 +121,25 @@ class MovieRecommendModel:
             return make_response({"error": "Movie not found"}, 404)
 
         # Get index of the matched movie
-        index = self.movies[self.movies["normalized_title"] == normalized_title].index[
-            0
-        ]
+        index = self.movies[self.movies["normalized_title"] == normalized_title].index[0]
         distances = self.similarity[index]
 
         # Get top 5 similar movies (excluding itself)
-        top_indices = np.argsort(-distances)[1:6]
+        top_indices = np.argsort(-distances)[1:11]
 
         recommendations = []
         for i in top_indices:
             row = self.movies.iloc[i]
-            recommendations.append(self.format_movie_row(row))
+            movie_data = self.format_movie_row(row)
+
+            # Calculate similarity percentage
+            similarity_percent = round(float(distances[i]) * 100, 2)
+            movie_data["similarity"] = f"{similarity_percent}%"
+
+            recommendations.append(movie_data)
 
         return make_response({"recommendations": recommendations}, 200)
+
 
     # Get single movie by ID
     def get_movie_by_id(self, movie_id: int):

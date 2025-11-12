@@ -8,17 +8,14 @@ import { fetchPosterUrlForTitle } from "../utils/tmdb";
 
 export default function MovieCard({ movie }) {
   const { user } = useAuth();
-  //Always call hooks at the top level
   const { isSaved, toggle } = useWishlist();
   const [posterUrl, setPosterUrl] = useState(null);
   const [posterLoading, setPosterLoading] = useState(true);
 
-  // Safely extract values (handle null movie)
   const id = movie?.id;
   const title = movie?.title;
   const overview = movie?.overview;
   const genres = movie?.genres;
-  // const cast = movie?.cast;
   const year = movie?.year;
 
   // Avoid calling functions when movie is null
@@ -54,7 +51,6 @@ export default function MovieCard({ movie }) {
       <Link to={to} state={{ movie }} className="block h-full">
         <CardContent className="flex h-full flex-col">
           {/* Wishlist button */}
-          {/* Wishlist Button (top-right corner of the image) */}
           {user && user.role_id === 3 && (
             <div className="absolute right-2 top-2 z-10">
               <button
@@ -120,7 +116,7 @@ export default function MovieCard({ movie }) {
 
           {/* Genres */}
           {Array.isArray(genres) && genres.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
+            <div className="my-4 flex flex-wrap gap-1">
               {genres.slice(0, 3).map((g, i) => (
                 <Badge key={`${id}-g-${i}`} className="text-[10px] px-2 py-0.5">
                   {g}
@@ -128,6 +124,28 @@ export default function MovieCard({ movie }) {
               ))}
             </div>
           )}
+          {/* Similarity Score */}
+          {movie?.similarity && (
+            <div className="mt-2 mb-4">
+              <span className="rounded-full bg-[#837fcb] px-3 py-1 text-xs font-medium text-white ring-1 ring-cyan-100">
+                Similarity: {movie.similarity}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between text-sm text-gray-700 mb-2">
+            <div className="flex items-center space-x-1">
+              <span className="font-medium text-cyan-700">
+                ⭐ {movie.vote_average}
+              </span>
+              <span className="text-gray-500"> Rating </span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="font-medium text-[#837fcb]">
+                🔥 {Math.round(movie.popularity)}
+              </span>
+              <span className="text-gray-500"> Popularity </span>
+            </div>
+          </div>
 
           {/* Overview */}
           {overview && (

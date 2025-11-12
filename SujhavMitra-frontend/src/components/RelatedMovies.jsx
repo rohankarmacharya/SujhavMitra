@@ -33,38 +33,9 @@ export default function RelatedMovies({
 
         // If we have genres, prioritize movies with matching genres
         let sorted = filtered;
-        if (currentMovieGenres.length > 0) {
-          sorted = filtered.sort((a, b) => {
-            const aGenres = Array.isArray(a.genres)
-              ? a.genres
-              : typeof a.genres === "string"
-              ? a.genres.split(",").map((g) => g.trim())
-              : [];
-
-            const bGenres = Array.isArray(b.genres)
-              ? b.genres
-              : typeof b.genres === "string"
-              ? b.genres.split(",").map((g) => g.trim())
-              : [];
-
-            const aMatches = aGenres.filter((g) =>
-              currentMovieGenres.some(
-                (cg) => cg.toLowerCase() === g.toLowerCase()
-              )
-            ).length;
-
-            const bMatches = bGenres.filter((g) =>
-              currentMovieGenres.some(
-                (cg) => cg.toLowerCase() === g.toLowerCase()
-              )
-            ).length;
-
-            return bMatches - aMatches;
-          });
-        }
 
         // Limit to 6 related movies
-        setRelatedMovies(sorted.slice(0, 6));
+        setRelatedMovies(sorted.slice(0, 10));
       } catch (err) {
         console.error("Error fetching related movies:", err);
         setError("Failed to load related movies");
