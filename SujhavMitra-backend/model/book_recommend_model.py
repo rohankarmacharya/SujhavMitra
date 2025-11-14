@@ -19,22 +19,24 @@ class BookRecommendModel:
     def get_popular_book_title(self):
         popular_titles = self.popbooks["Book-Title"].unique()[:15]
         popular_books_info = []
+        
         for title in popular_titles:
             book_info = self.books[self.books["Book-Title"] == title].drop_duplicates("Book-Title")
+            pop_info = self.popbooks[self.popbooks["Book-Title"] == title]
 
-             # If book info exists, add its details to the list
-            if not book_info.empty:
+            if not book_info.empty and not pop_info.empty:
                 popular_books_info.append({
                     "title": book_info["Book-Title"].values[0],
                     "author": book_info["Book-Author"].values[0],
                     "isbn": book_info["ISBN"].values[0],
                     "publishdate": book_info["Year-Of-Publication"].values[0],
                     "publisher": book_info["Publisher"].values[0],
-                    "imageurl": book_info["Image-URL-L"].values[0]
+                    "imageurl": book_info["Image-URL-L"].values[0],
+                    "num_rating": int(pop_info["num_rating"].values[0]),
+                    "avg_rating": round(float(pop_info["avg_rating"].values[0]), 2)
                 })
 
-        return make_response({"popular_books": popular_books_info},200)
-
+        return make_response({"popular_books": popular_books_info}, 200)
 
     def book_recommend_model(self, title):
         norm_title = title.strip().lower()
@@ -61,6 +63,7 @@ class BookRecommendModel:
         recommendations = []
         for i in book_list:
             similar_title = self.book_user_matrix.index[i[0]]
+            similarity_score = i[1] * 100  # Convert to percentage
 
             # Find full book info (title, author, ISBN) — drop duplicates to avoid multiple editions
             book_info = self.books[self.books["Book-Title"] == similar_title].drop_duplicates("Book-Title")
@@ -70,12 +73,14 @@ class BookRecommendModel:
                     "title": book_info["Book-Title"].values[0],
                     "author": book_info["Book-Author"].values[0],
                     "isbn": book_info["ISBN"].values[0],
-                    "publishdate":book_info["Year-Of-Publication"].values[0],
-                    "publisher":book_info["Publisher"].values[0],
-                    "imageurl":book_info["Image-URL-L"].values[0]
+                    "publishdate": book_info["Year-Of-Publication"].values[0],
+                    "publisher": book_info["Publisher"].values[0],
+                    "imageurl": book_info["Image-URL-L"].values[0],
+                    "similarity_score": f"{similarity_score:.2f} %"  # 2 decimal percentage
                 })
 
-        return make_response({"recommendations": recommendations},200)
+        return make_response({"recommendations": recommendations}, 200)
+
     
     def get_book_by_isbn(self, isbn):
         norm_isbn = str(isbn).strip()

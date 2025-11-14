@@ -306,7 +306,7 @@ export default function MovieDetail() {
       {/* Recommendations Section */}
       <div className="mt-8 mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Recommended Movies
+          Recommended Movies ({recommendations.length})
         </h2>
 
         {loadingRecommendations ? (
