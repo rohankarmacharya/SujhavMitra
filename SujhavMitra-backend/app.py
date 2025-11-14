@@ -4,6 +4,7 @@ from controller.book_recommend_controller import book_bp
 from controller.movie_recommend_controller import movie_bp
 from controller.user_controller import user_bp
 from controller.wishlist_controller import wishlist_bp
+from controller.rating_controller import rating_bp
 
 # Flask constructor takes the name of current module (__name__) as argument.app is a instance of the Flask app
 app = Flask(__name__)
@@ -22,6 +23,7 @@ CORS(app,
 
 # Register blueprints
 app.register_blueprint(book_bp)
+app.register_blueprint(rating_bp)
 app.register_blueprint(movie_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(wishlist_bp)
