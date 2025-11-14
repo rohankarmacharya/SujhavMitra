@@ -252,6 +252,12 @@ const Header = () => {
                 )}
               </div>
             )}
+            {user && (
+              <>
+                <Link to="/my-ratings">My Ratings</Link>
+                <Link to="/recommendations">Recommendations</Link>
+              </>
+            )}
 
             {/* Auth Buttons */}
             {user ? (

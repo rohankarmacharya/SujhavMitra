@@ -1,6 +1,5 @@
 from flask import make_response, jsonify
 import mysql.connector
-from configs.config import dbconfig
 from mysql.connector import Error
 import pickle
 import numpy as np
@@ -20,14 +19,17 @@ class RatingModel:
         self.book_index_titles = list(self.book_user_matrix.index.str.lower().str.strip())
         
     def get_db_connection(self):
-        """Create database connection"""
+        """Create database connection - creates new connection each time to avoid timeout issues"""
         try:
+            from configs.config import dbconfig
             connection = mysql.connector.connect(
                 host=dbconfig["host"],
-                port=dbconfig["port"],
+                database=dbconfig["database"],
                 user=dbconfig["user"],
                 password=dbconfig["password"],
-                database=dbconfig["database"],
+                port=dbconfig["port"],
+                autocommit=True,
+                connect_timeout= 10
             )
             return connection
         except Error as e:
@@ -373,3 +375,5 @@ class RatingModel:
         finally:
             cursor.close()
             connection.close()
+
+

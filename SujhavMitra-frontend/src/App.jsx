@@ -13,6 +13,8 @@ import Wishlist from "./pages/Wishlist";
 import AdminDashboard from "./pages/AdminDashboard";
 import Movies from "./pages/Movies";
 import MovieDetail from "./pages/MovieDetail";
+import RecommendationsPage from "./pages/RecommendationsPage";
+import MyRatingsPage from "./pages/MyRatingsPage";
 
 function App() {
   const [toasts, setToasts] = useState([]);
@@ -23,7 +25,11 @@ function App() {
     const onToast = (e) => {
       const { action, data, variant, timeout, message } = e.detail || {};
       if (!action) return;
-      const label = message || `${data?.title || data?.name || "Item"} ${action === "added" ? "added to" : "removed from"} wishlist`;
+      const label =
+        message ||
+        `${data?.title || data?.name || "Item"} ${
+          action === "added" ? "added to" : "removed from"
+        } wishlist`;
       const id = Date.now() + Math.random();
       const t = {
         id,
@@ -55,7 +61,10 @@ function App() {
       const t = { id, msg: message, variant: variant || "info" };
       setToasts((prev) => [...prev, t]);
       const ttl = typeof timeout === "number" ? timeout : 2800;
-      setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), ttl);
+      setTimeout(
+        () => setToasts((prev) => prev.filter((x) => x.id !== id)),
+        ttl
+      );
     };
     window.addEventListener("app:toast", onAppToast);
     return () => {
@@ -88,11 +97,16 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Wishlist />} />
         <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/my-ratings" element={<MyRatingsPage />} />
+        <Route path="/recommendations" element={<RecommendationsPage />} />
         {/* fallback */}
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
       {toasts.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2" aria-live="polite">
+        <div
+          className="fixed top-4 right-4 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2"
+          aria-live="polite"
+        >
           {toasts.map((t) => (
             <div
               key={t.id}
@@ -111,16 +125,43 @@ function App() {
             >
               <div className="mt-0.5">
                 {t.variant === "success" ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-green-600">
-                    <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-2.59a.75.75 0 0 0-1.06-1.06l-4.72 4.72-1.78-1.78a.75.75 0 1 0-1.06 1.06l2.31 2.31c.293.293.767.293 1.06 0l5.25-5.25Z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5 text-green-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-2.59a.75.75 0 0 0-1.06-1.06l-4.72 4.72-1.78-1.78a.75.75 0 1 0-1.06 1.06l2.31 2.31c.293.293.767.293 1.06 0l5.25-5.25Z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 ) : t.variant === "error" ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-red-600">
-                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3.53 6.72a.75.75 0 0 0-1.06-1.06L12 10.44 9.53 7.91a.75.75 0 0 0-1.06 1.06L10.44 12l-1.97 1.97a.75.75 0 1 0 1.06 1.06L12 13.06l2.47 2.47a.75.75 0 1 0 1.06-1.06L13.06 12l2.47-2.47Z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5 text-red-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3.53 6.72a.75.75 0 0 0-1.06-1.06L12 10.44 9.53 7.91a.75.75 0 0 0-1.06 1.06L10.44 12l-1.97 1.97a.75.75 0 1 0 1.06 1.06L12 13.06l2.47 2.47a.75.75 0 1 0 1.06-1.06L13.06 12l2.47-2.47Z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-purple-600">
-                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-.75 5.25a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-1.5 0V7.5Zm.75 9.75a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25Z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5 text-purple-600"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-.75 5.25a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-1.5 0V7.5Zm.75 9.75a1.125 1.125 0 1 1 0-2.25 1.125 1.125 0 0 1 0 2.25Z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 )}
               </div>
@@ -128,10 +169,21 @@ function App() {
               <button
                 aria-label="Close"
                 className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
-                onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+                onClick={() =>
+                  setToasts((prev) => prev.filter((x) => x.id !== t.id))
+                }
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                  <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 1 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 1 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             </div>
