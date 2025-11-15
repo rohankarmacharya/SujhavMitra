@@ -19,6 +19,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const closeBtnRef = useRef(null);
   const { list, count } = useWishlist();
   const [wlOpen, setWlOpen] = useState(false);
@@ -33,6 +34,15 @@ const Header = () => {
       dynamicNav.push({ name: "Wishlist", path: "/profile" });
     }
   }
+
+  // Handle scroll for background effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // close on ESC
   useEffect(() => {
@@ -109,7 +119,13 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-md py-4 z-40 relative">
+    <header
+      className={`fixed top-0 left-0 right-0 z-40 py-4 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-md shadow-lg"
+          : "bg-white shadow-md"
+      }`}
+    >
       <div className="wrapper">
         <div className="mx-auto flex justify-between items-center px-4">
           {/* Logo */}
@@ -133,7 +149,6 @@ const Header = () => {
           </nav>
 
           {/* Wishlist + Auth Section */}
-
           <div className="flex gap-4 items-center">
             {/* Wishlist quick */}
             {user && user.role_id === 3 && (
@@ -252,12 +267,6 @@ const Header = () => {
                 )}
               </div>
             )}
-            {user && (
-              <>
-                <Link to="/my-ratings">My Ratings</Link>
-                <Link to="/recommendations">Recommendations</Link>
-              </>
-            )}
 
             {/* Auth Buttons */}
             {user ? (
@@ -310,7 +319,7 @@ const Header = () => {
         {/* Drawer Header */}
         <div className="flex items-center justify-between p-4 border-b">
           {user && (
-            <span className="text-gray-700 text-sm font-medium">
+            <span className="text-gray-700 text-sm font-medium capitalize">
               {user.name || user.email?.split("@")[0] || "User"}
             </span>
           )}

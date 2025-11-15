@@ -57,20 +57,13 @@ export default function Movies() {
               <span role="img" aria-label="movies">
                 🎬
               </span>
-              You are in Movies
+              Discover Movies • Get Recommendations you'll love
             </Badge>
           </div>
 
           <Card className="mb-8">
             <CardContent className="p-5 md:p-6">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Movies
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Search by title to get movie details and recommendations.
-              </p>
-
-              <div className="mt-5">
+              <div>
                 <SearchBox
                   query={query}
                   onQueryChange={setQuery}

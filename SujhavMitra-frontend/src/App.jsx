@@ -13,8 +13,9 @@ import Wishlist from "./pages/Wishlist";
 import AdminDashboard from "./pages/AdminDashboard";
 import Movies from "./pages/Movies";
 import MovieDetail from "./pages/MovieDetail";
-import RecommendationsPage from "./pages/RecommendationsPage";
-import MyRatingsPage from "./pages/MyRatingsPage";
+import RecommendationsPage from "./pages/RecommendationsPagee";
+import MyRatingsPage from "./pages/MyRatingsPagee";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [toasts, setToasts] = useState([]);
@@ -43,11 +44,12 @@ function App() {
       }, ttl);
     };
     window.addEventListener("wishlist:toast", onToast);
-    // also allow generic app toasts with a message
+
+    // Generic app toasts
     const onAppToast = (e) => {
       const { message, variant, timeout } = e.detail || {};
       if (!message) return;
-      // throttle duplicate messages fired close together (e.g., StrictMode double-invoke)
+      // throttle duplicate messages fired close together
       const now = Date.now();
       if (
         lastToastRef.current &&
@@ -67,6 +69,7 @@ function App() {
       );
     };
     window.addEventListener("app:toast", onAppToast);
+
     return () => {
       window.removeEventListener("wishlist:toast", onToast);
       window.removeEventListener("app:toast", onAppToast);
@@ -95,13 +98,46 @@ function App() {
         <Route path="/book/title/:slug" element={<BookDetails />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Wishlist />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/my-ratings" element={<MyRatingsPage />} />
-        <Route path="/recommendations" element={<RecommendationsPage />} />
-        {/* fallback */}
+
+        {/* Protected Routes */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-ratings"
+          element={
+            <ProtectedRoute>
+              <MyRatingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recommendations"
+          element={
+            <ProtectedRoute>
+              <RecommendationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
+
+      {/* Toast Container */}
       {toasts.length > 0 && (
         <div
           className="fixed top-4 right-4 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2"

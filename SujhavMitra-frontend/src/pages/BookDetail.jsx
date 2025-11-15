@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import {
   fetchBookById,
   fetchBookByTitle,
   fetchBookRecommendations,
 } from "../services/api";
-// import useWishlist from "../hooks/useWishlist";
 import Loading from "../components/Loading";
 import ReadNowButton from "../components/ui/ReadNowButton";
 import WishlistButton from "../components/ui/WishlistButton";
@@ -14,11 +13,12 @@ import BackToPage from "../components/ui/BackToPage";
 import SectionHeader from "../components/SectionHeader";
 import RelatedBooks from "../components/RelatedBooks";
 import RatingButton from "../components/RatingButton";
+import { showToast } from "../utils/toast";
 
 const BookDetails = () => {
   const { user } = useAuth();
   const { isbn, slug } = useParams();
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const [book, setBook] = useState(location.state?.book || null);
@@ -26,7 +26,6 @@ const BookDetails = () => {
   const [loading, setLoading] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(false);
   const [error, setError] = useState("");
-  //   const { isSaved } = useWishlist();
 
   useEffect(() => {
     if (location.state?.book) {
@@ -76,13 +75,20 @@ const BookDetails = () => {
     return () => {
       cancelled = true;
     };
-  }, [isbn, slug]);
+  }, [isbn, slug, book]);
+
+  const handleRatingClick = () => {
+    if (!user) {
+      showToast("Please login to rate this book", "error", 3000);
+      setTimeout(() => {
+        navigate("/login", { state: { from: location.pathname } });
+      }, 500);
+    }
+  };
 
   if (loading) return <Loading />;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
   if (!book) return <p className="text-center mt-10">Book not found.</p>;
-
-  //   const saved = isSaved("book", book.isbn || book.title);
 
   return (
     <div className="wrapper py-8">
@@ -136,24 +142,40 @@ const BookDetails = () => {
                 Published: {book.publishdate}
               </p>
             )}
-            <RatingButton
-              book={{
-                isbn: book.isbn,
-                title: book.title,
-                author: book.author,
-              }}
-              onRatingChange={(rating) => {
-                console.log("Rating changed:", rating);
-                // Optional: refresh recommendations, etc.
-              }}
-            />
+
+            {/* Rating Button with Login Check */}
+            {user ? (
+              <RatingButton
+                book={{
+                  isbn: book.isbn,
+                  title: book.title,
+                  author: book.author,
+                }}
+                onRatingChange={(rating) => {
+                  console.log("Rating changed:", rating);
+                  showToast("Rating saved successfully!", "success");
+                }}
+              />
+            ) : (
+              <div className="my-4">
+                <button
+                  onClick={handleRatingClick}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 border border-gray-300 hover:border-gray-400"
+                  title="Login to rate this book"
+                >
+                  <span className="text-lg">⭐</span>
+                  <span className="font-medium">Rate this Book</span>
+                  <span className="text-xs ml-1">🔒</span>
+                </button>
+              </div>
+            )}
 
             {book.isbn && <ReadNowButton isbn={book.isbn} />}
           </div>
         </div>
       </div>
 
-      {/*Reusable Related Books Component */}
+      {/* Reusable Related Books Component */}
       <RelatedBooks
         relatedBooks={relatedBooks}
         loadingRelated={loadingRelated}
