@@ -3,20 +3,16 @@ import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/Card";
 import RatingModal from "../../components/RatingModal";
-import {
-  getMyRatings,
-  deleteRating,
-  updateRating,
-} from "../../services/ratingService";
-import { resolvePosterUrl } from "../../services/api";
+import { getMyRatings, deleteRating } from "../../services/ratingService";
 import { showToast } from "../../utils/toast";
+import SectionHeader from "../../components/SectionHeader";
+import Skeleton from "../../components/Skeleton";
 
 export default function MyRatingsTab({ onSwitchTab }) {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editingBook, setEditingBook] = useState(null);
 
   useEffect(() => {
     if (user && token) {
@@ -31,18 +27,6 @@ export default function MyRatingsTab({ onSwitchTab }) {
       setRatings(result.data.ratings || []);
     }
     setLoading(false);
-  };
-
-  const handleUpdateRating = async (newRating) => {
-    if (!editingBook) return;
-    const result = await updateRating(token, editingBook.id, newRating);
-    if (result.success) {
-      await fetchRatings();
-      setEditingBook(null);
-      showToast("Rating updated successfully!");
-    } else {
-      alert(result.error || "Failed to update rating");
-    }
   };
 
   const handleDeleteRating = async (ratingId, bookTitle) => {
@@ -99,11 +83,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <Skeleton />;
   }
 
   if (ratings.length === 0) {
@@ -145,8 +125,14 @@ export default function MyRatingsTab({ onSwitchTab }) {
   return (
     <>
       <div className="mx-auto max-w-6xl px-4">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">My Ratings</h2>
+        <div className="mt-6 mb-6">
+          <SectionHeader
+            title="My Ratings"
+            description={`You've rated ${ratings.length}  ${
+              ratings.length === 1 ? "book" : "books"
+            }`}
+          />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2"></h2>
           <p className="text-gray-600">
             You've rated {ratings.length}{" "}
             {ratings.length === 1 ? "book" : "books"}
@@ -161,7 +147,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
             >
               <div className="relative h-64 bg-gray-200">
                 <img
-                  src={resolvePosterUrl(rating.imageurl)}
+                  src={rating.imageurl}
                   alt={rating.book_title}
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -219,25 +205,11 @@ export default function MyRatingsTab({ onSwitchTab }) {
                 <div className="flex gap-2">
                   <button
                     onClick={() =>
-                      setEditingBook({
-                        id: rating.id,
-                        title: rating.book_title,
-                        author: rating.author,
-                        isbn: rating.isbn,
-                        rating: rating.rating,
-                      })
-                    }
-                    className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Update
-                  </button>
-                  <button
-                    onClick={() =>
                       handleDeleteRating(rating.id, rating.book_title)
                     }
                     className="px-3 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 transition-colors"
                   >
-                    Delete
+                    Delete Rating
                   </button>
                 </div>
               </div>
@@ -251,20 +223,11 @@ export default function MyRatingsTab({ onSwitchTab }) {
               onClick={() => onSwitchTab("recommendations")}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
             >
-              ✨ Get Personalized Recommendations
+              Get Recommendations
             </button>
           </div>
         )}
       </div>
-
-      {editingBook && (
-        <RatingModal
-          book={editingBook}
-          existingRating={editingBook}
-          onClose={() => setEditingBook(null)}
-          onSubmit={handleUpdateRating}
-        />
-      )}
     </>
   );
 }

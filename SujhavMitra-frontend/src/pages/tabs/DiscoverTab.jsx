@@ -47,6 +47,7 @@ export default function DiscoverTab() {
     <>
       <div className="wrapper pt-10">
         <div className="mx-auto max-w-6xl px-4">
+          <SectionHeader subtitle="Browse and Discover" />
           <div className="mb-3">
             <Badge variant="cyan" className="gap-2">
               <span role="img" aria-label="books">

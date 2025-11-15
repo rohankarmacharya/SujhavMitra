@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import useWishlist from "../hooks/useWishlist";
 import { Trash2 } from "lucide-react";
+import { showToast } from "../utils/toast";
 
 const tabs = [
   { key: "all", label: "All" },
@@ -67,6 +68,9 @@ export default function Wishlist() {
       setIsClearing(false);
     }
   };
+  useEffect(() => {
+    showToast("You are in Wishlist");
+  }, []);
 
   return (
     <div className="wrapper pb-16">

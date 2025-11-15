@@ -16,6 +16,7 @@ import MovieDetail from "./pages/MovieDetail";
 import RecommendationsPage from "./pages/RecommendationsPagee";
 import MyRatingsPage from "./pages/MyRatingsPagee";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ContentBanner from "./components/ui/ContentBanner";
 
 function App() {
   const [toasts, setToasts] = useState([]);
@@ -86,8 +87,9 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-gray-300">
+    <div className="min-h-screen bg-white">
       <Header />
+      <ContentBanner />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about-us" element={<About />} />

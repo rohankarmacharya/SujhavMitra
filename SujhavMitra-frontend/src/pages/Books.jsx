@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
-import SectionHeader from "../components/SectionHeader";
 import DiscoverTab from "./tabs/DiscoverTab";
 import MyRatingsTab from "./tabs/MyRatingsTab";
 import RecommendationsTab from "./tabs/RecommendationsTab";
@@ -15,9 +14,9 @@ export default function Books() {
   }, []);
 
   const tabs = [
-    { id: "discover", label: "Discover", icon: "🔍" },
+    { id: "discover", label: "Discover", icon: "" },
     { id: "ratings", label: "My Ratings", icon: "", requiresAuth: true },
-    { id: "recommendations", label: "For You", icon: "✨", requiresAuth: true },
+    { id: "recommendations", label: "For You", icon: "", requiresAuth: true },
   ];
 
   const handleTabClick = (tab) => {
@@ -46,8 +45,6 @@ export default function Books() {
 
   return (
     <div className="Bookpage pt-10 pb-16 min-h-screen bg-gray-50">
-      <SectionHeader subtitle="Browse and Discover" />
-
       {/* Tabs Navigation */}
       <div className="wrapper pt-6">
         <div className="mx-auto max-w-6xl px-4">
@@ -63,7 +60,7 @@ export default function Books() {
                       flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200
                       ${
                         activeTab === tab.id
-                          ? "bg-blue-600 text-white shadow-md"
+                          ? "bg-[#4fb4ce] text-white shadow-md"
                           : isDisabled
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-200 hover:shadow-sm active:scale-95"
                           : "bg-white text-gray-700 hover:bg-gray-50 hover:shadow-sm active:scale-95"

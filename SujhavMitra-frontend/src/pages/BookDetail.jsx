@@ -75,7 +75,7 @@ const BookDetails = () => {
     return () => {
       cancelled = true;
     };
-  }, [isbn, slug, book]);
+  }, [isbn, slug]);
 
   const handleRatingClick = () => {
     if (!user) {

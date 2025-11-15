@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPopularMovies, fetchMovieRecommendations } from "../services/api";
-import MovieCard from "../components/MovieCard";
+// import MovieCard from "../components/MovieCard";
 import SectionHeader from "../components/SectionHeader";
 import SearchBox from "../components/ui/SearchBox";
 import ErrorMessage from "../components/ui/ErrorMessage";
@@ -47,7 +47,7 @@ export default function Movies() {
   }, []);
 
   return (
-    <div className="moviepage pt-10 pb-16">
+    <div className="moviepage pt-10 pb-16  bg-gray-50">
       <SectionHeader subtitle="Browse and Discover" />
 
       <div className="wrapper pt-10">

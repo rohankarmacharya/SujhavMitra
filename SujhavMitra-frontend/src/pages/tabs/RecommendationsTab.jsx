@@ -3,7 +3,8 @@ import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/Card";
 import { getMyRecommendations } from "../../services/ratingService";
-import { resolvePosterUrl } from "../../services/api";
+import Loading from "../../components/Loading";
+import SectionHeader from "../../components/SectionHeader";
 
 export default function RecommendationsTab({ onSwitchTab }) {
   const { user, token } = useAuth();
@@ -67,14 +68,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Finding perfect books for you...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (basedOnRatings === 0) {
@@ -123,22 +117,10 @@ export default function RecommendationsTab({ onSwitchTab }) {
   return (
     <div className="mx-auto max-w-7xl px-4">
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              ✨ Recommendations For You
-            </h2>
-            <p className="text-gray-600">
-              Based on {basedOnRatings} books you've rated
-            </p>
-          </div>
-          <button
-            onClick={() => onSwitchTab("ratings")}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            View My Ratings
-          </button>
-        </div>
+        <SectionHeader
+          title="Recommendations For You"
+          description={`Based on ${basedOnRatings} books you've rated`}
+        />
 
         <div className="flex items-center gap-3 text-sm">
           <span className="text-gray-600">Show:</span>
@@ -171,7 +153,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
 
               <div className="h-72 bg-gray-200">
                 <img
-                  src={resolvePosterUrl(book.imageurl)}
+                  src={book.imageurl}
                   alt={book.title}
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -213,6 +195,12 @@ export default function RecommendationsTab({ onSwitchTab }) {
                 >
                   {expandedBook === index ? "Hide Details" : "Why This?"}
                 </button>
+                <button
+                  onClick={() => navigate(`/book/${book.isbn}`)}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  View
+                </button>
               </div>
 
               {expandedBook === index && book.similar_to && (
@@ -242,6 +230,12 @@ export default function RecommendationsTab({ onSwitchTab }) {
           </div>
         ))}
       </div>
+      <button
+        onClick={() => onSwitchTab("ratings")}
+        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+      >
+        View My Ratings
+      </button>
 
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="font-semibold text-blue-900 mb-2">
