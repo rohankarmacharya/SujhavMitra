@@ -39,7 +39,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
   const getScoreColor = (score) => {
     const numScore = parseFloat(score);
     if (numScore >= 50) return "text-green-600 bg-green-100";
-    if (numScore >= 30) return "text-blue-600 bg-blue-100";
+    if (numScore >= 30) return "text-[#4fb4ce] bg-blue-100";
     if (numScore >= 15) return "text-yellow-600 bg-yellow-100";
     return "text-gray-600 bg-gray-100";
   };
@@ -57,7 +57,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
             </p>
             <button
               onClick={() => navigate("/login")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-[#4fb4ce] text-white rounded-lg hover:bg-[#837fcb] transition-colors"
             >
               Login
             </button>
@@ -77,7 +77,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
         <Card>
           <CardContent className="p-12 text-center">
             <svg
-              className="w-20 h-20 mx-auto text-blue-600 mb-4"
+              className="w-20 h-20 mx-auto text-[#4fb4ce] mb-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -92,13 +92,16 @@ export default function RecommendationsTab({ onSwitchTab }) {
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
               No Recommendations Yet
             </h2>
+            <h4 className=" mb-3">
+              Cold start problem: This is missing in project defense
+            </h4>
             <p className="text-gray-600 mb-6">
               Rate at least 3-5 books to get personalized recommendations based
               on your taste!
             </p>
             <button
               onClick={() => onSwitchTab("ratings")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-3"
+              className="px-6 py-3 bg-[#4fb4ce] text-white rounded-lg hover:bg-[#837fcb] transition-colors mr-3"
             >
               Go to My Ratings
             </button>
@@ -130,7 +133,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
               onClick={() => setLimit(num)}
               className={`px-3 py-1 rounded-lg transition-colors ${
                 limit === num
-                  ? "bg-blue-600 text-white"
+                  ? "bg-[#4fb4ce] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
@@ -147,7 +150,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
           >
             <div className="relative">
-              <div className="absolute top-2 left-2 bg-blue-600 text-white font-bold px-3 py-1 rounded-full text-sm z-10">
+              <div className="absolute top-2 left-2 bg-[#4fb4ce] text-white font-bold px-3 py-1 rounded-full text-sm z-10">
                 #{index + 1}
               </div>
 
@@ -180,7 +183,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
               {book.similar_to && book.similar_to.length > 0 && (
                 <div className="mb-3">
                   <p className="text-xs text-gray-500 mb-1">Similar to:</p>
-                  <p className="text-xs font-medium text-blue-600 line-clamp-1">
+                  <p className="text-xs font-medium text-[#4fb4ce] line-clamp-1">
                     {book.similar_to[0].book} ({book.similar_to[0].your_rating})
                   </p>
                 </div>
@@ -191,7 +194,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
                   onClick={() =>
                     setExpandedBook(expandedBook === index ? null : index)
                   }
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex-1 px-3 py-2 bg-[#4fb4ce] text-white text-sm rounded-lg hover:bg-[#837fcb] transition-colors"
                 >
                   {expandedBook === index ? "Hide Details" : "Why This?"}
                 </button>
@@ -218,7 +221,7 @@ export default function RecommendationsTab({ onSwitchTab }) {
                           <span>You rated: {source.your_rating}</span>
                           <span>Similarity: {source.similarity}</span>
                         </div>
-                        <div className="text-blue-600 font-medium mt-1">
+                        <div className="text-[#4fb4ce] font-medium mt-1">
                           Contribution: {source.contribution}
                         </div>
                       </div>

@@ -69,7 +69,7 @@ export default function Wishlist() {
     }
   };
   useEffect(() => {
-    showToast("You are in Wishlist");
+    showToast("View your favorites");
   }, []);
 
   return (

@@ -10,7 +10,7 @@ export default function Books() {
   const [activeTab, setActiveTab] = useState("discover");
 
   useEffect(() => {
-    showToast("You are in Books");
+    showToast("Discover your next read");
   }, []);
 
   const tabs = [

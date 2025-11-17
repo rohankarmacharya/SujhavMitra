@@ -46,7 +46,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
 
   const getRatingColor = (rating) => {
     if (rating >= 8) return "text-green-600 bg-green-100";
-    if (rating >= 6) return "text-blue-600 bg-blue-100";
+    if (rating >= 6) return "text-[#4fb4ce] bg-blue-100";
     if (rating >= 4) return "text-yellow-600 bg-yellow-100";
     return "text-red-600 bg-red-100";
   };
@@ -72,7 +72,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
             </p>
             <button
               onClick={() => navigate("/login")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-[#4fb4ce] text-white rounded-lg hover:bg-[#837fcb] transition-colors"
             >
               Login
             </button>
@@ -112,7 +112,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
             </p>
             <button
               onClick={() => onSwitchTab("discover")}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-[#4fb4ce] text-white rounded-lg hover:bg-[#837fcb] transition-colors"
             >
               Discover Books
             </button>
@@ -221,7 +221,7 @@ export default function MyRatingsTab({ onSwitchTab }) {
           <div className="mt-8 text-center">
             <button
               onClick={() => onSwitchTab("recommendations")}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+              className="px-8 py-4 bg-gradient-to-r from-[#4fb4ce] to-purple-600 text-white text-lg font-semibold rounded-lg hover:from-[#837fcb] hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
             >
               Get Recommendations
             </button>

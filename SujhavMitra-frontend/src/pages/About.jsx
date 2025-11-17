@@ -1,4 +1,10 @@
+import { useEffect } from "react";
+import { showToast } from "../utils/toast";
+
 export default function About() {
+  useEffect(() => {
+    showToast("Get to know us better!");
+  }, []);
   return (
     <div className="content">
       <div className="wrapper pb-16">
@@ -106,10 +112,10 @@ export default function About() {
                 <p className="mt-3 text-sm text-gray-700 leading-relaxed">
                   • Uses <strong>Content-Based Filtering</strong> (no user
                   history required). <br />• Movie overviews processed using{" "}
-                  <strong>TF-IDF</strong>. <br />
-                  • Genres, cast & keywords tokenized into feature vectors.{" "}
-                  <br />• <strong>Cosine Similarity</strong> identifies
-                  semantically similar films. <br />
+                  <strong>TF-IDF</strong>. <br />• Genres, cast & keywords
+                  tokenized into feature vectors. <br />•{" "}
+                  <strong>Cosine Similarity</strong> identifies semantically
+                  similar films. <br />
                   • Precomputed similarity matrices guarantee low-latency
                   recommendations. <br />
                   This allows SujhavMitra to find movies with similar themes,

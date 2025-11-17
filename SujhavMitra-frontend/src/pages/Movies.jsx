@@ -43,7 +43,7 @@ export default function Movies() {
 
   // Toast reminder
   useEffect(() => {
-    showToast("You are in Movies");
+    showToast("Find your next watch");
   }, []);
 
   return (

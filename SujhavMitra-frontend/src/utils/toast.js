@@ -4,7 +4,7 @@
  * @param {'success' | 'error' | 'info' | 'warning'} [variant='info'] - Toast type
  * @param {number} [timeout=2200] - Duration in milliseconds
  */
-export function showToast(message, variant = "info", timeout = 2200) {
+export function showToast(message, variant = "info", timeout = 500) {
   try {
     window.dispatchEvent(
       new CustomEvent("app:toast", { detail: { message, variant, timeout } })

@@ -135,11 +135,28 @@ export default function useWishlist() {
         setLoading(false);
       }
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [mapApiToItems]);
 
   // Initial fetch
   useEffect(() => {
     fetchWishlist();
+  }, [fetchWishlist]);
+
+  // Listen for wishlist updates from other components
+  useEffect(() => {
+    const handleWishlistUpdate = (event) => {
+      console.log("Wishlist update event received:", event.detail);
+      fetchWishlist();
+    };
+
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
+    return () => {
+      window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+    };
   }, [fetchWishlist]);
 
   // Check if an item is in the wishlist
@@ -226,6 +243,13 @@ export default function useWishlist() {
         // Refresh the wishlist to get the latest data
         await fetchWishlist();
 
+        // Notify other components using the hook
+        window.dispatchEvent(
+          new CustomEvent("wishlist-updated", {
+            detail: { action: "added", kind, key: k },
+          })
+        );
+
         return { success: true, data: responseData };
       } catch (err) {
         if (err.name === "AbortError") {
@@ -301,6 +325,17 @@ export default function useWishlist() {
               kind: itemToRemove.kind,
               key: itemToRemove.key,
               variant: "error",
+            },
+          })
+        );
+
+        // Notify other components using the hook
+        window.dispatchEvent(
+          new CustomEvent("wishlist-updated", {
+            detail: {
+              action: "removed",
+              kind: itemToRemove.kind,
+              key: itemToRemove.key,
             },
           })
         );
